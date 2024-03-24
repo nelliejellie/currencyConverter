@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   },
   country: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: 'green',
     marginBottom: 4,
   },
 });

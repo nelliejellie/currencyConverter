@@ -8,31 +8,83 @@ import {
   Text,
   useColorScheme,
   View,
+  TextInput,
+  FlatList,
+  Pressable,
+  Alert,
 } from 'react-native';
 import {currencyByRupee} from './constants';
 import CurrencyButton from './components/CurrencyButton';
-import Snackbar from 'react-native-snackbar';
 
-function App(): React.JSX.Element {
+const App = (): React.JSX.Element => {
   const [inputValue, setInputValue] = useState('');
   const [resultValue, setResultValue] = useState('');
   const [targetCurrency, setTragetCurrency] = useState('');
 
   const buttonPressed = (targetValue: Currency) => {
     if (!inputValue) {
-      return Snackbar.show({
-        text: 'Enter a value to convert',
-        backgroundColor: '#EA7773',
-        textColor: '#000000',
-      });
+      Alert.alert('Warning', 'Enter a value to convert', [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel button pressed'),
+          style: 'cancel',
+        },
+      ]);
+    }
+    const inputAmount = parseFloat(inputValue);
+    if (!isNaN(inputAmount)) {
+      const convertedValue = inputAmount * targetValue.value;
+      const result = `${targetValue.symbol} ${convertedValue.toFixed(2)}`;
+      setResultValue(result);
+      setTragetCurrency(targetValue.name);
+    } else {
+      Alert.alert('Warning', 'Not a valid number to convert', [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel button pressed'),
+          style: 'cancel',
+        },
+      ]);
     }
   };
   return (
-    <SafeAreaView style={styles.container}>
+    <>
       <StatusBar />
-    </SafeAreaView>
+      <View style={styles.container}>
+        <View style={styles.topContainer}>
+          <View style={styles.rupeesContainer}>
+            <Text>NGN</Text>
+            <TextInput
+              maxLength={14}
+              value={inputValue}
+              placeholder="Enter a value...."
+              keyboardType="number-pad"
+              onChangeText={setInputValue}
+            />
+          </View>
+          {resultValue && <Text style={styles.resultTxt}>{resultValue}</Text>}
+        </View>
+        <View style={styles.bottomContainer}>
+          <FlatList
+            numColumns={3}
+            data={currencyByRupee}
+            keyExtractor={item => item.name}
+            renderItem={({item}) => (
+              <Pressable
+                style={[
+                  styles.button,
+                  targetCurrency === item.name && styles.selected,
+                ]}
+                onPress={() => buttonPressed(item)}>
+                <CurrencyButton flag={item.flag} name={item.name} />
+              </Pressable>
+            )}
+          />
+        </View>
+      </View>
+    </>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
